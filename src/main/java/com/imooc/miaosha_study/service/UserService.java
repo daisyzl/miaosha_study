@@ -2,6 +2,7 @@ package com.imooc.miaosha_study.service;
 
 import com.imooc.miaosha_study.dao.UserDao;
 import com.imooc.miaosha_study.domain.User;
+import com.imooc.miaosha_study.vo.LoginVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,4 +33,6 @@ public class UserService {
         userDao.insert(u2);
         return true;
     }
+
+
 }
