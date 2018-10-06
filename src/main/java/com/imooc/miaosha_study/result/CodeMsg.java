@@ -52,6 +52,9 @@ public class CodeMsg {
         this.msg = msg;
     }
 
+    /*
+    public static CodeMsg BIND_ERROR = new CodeMsg(500101, "参数校验异常：%s");
+     */
     public CodeMsg fillArgs(Object... args) {
         int code = this.code;
         String message = String.format(this.msg, args);
