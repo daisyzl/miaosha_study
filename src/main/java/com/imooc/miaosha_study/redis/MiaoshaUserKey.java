@@ -8,6 +8,7 @@ public class MiaoshaUserKey extends BasePrefix{
         super(expireSeconds,prefix);
     }
     public static MiaoshaUserKey token=new MiaoshaUserKey(TOKEN_EXPIRE,"tk");
-//    public static MiaoshaUserKey getByNa
+    public static MiaoshaUserKey getById =new MiaoshaUserKey(0,"id");
+    //对象级缓存过期时间长期
 
 }

@@ -4,8 +4,10 @@ import com.imooc.miaosha_study.domain.MiaoshaUser;
 import com.imooc.miaosha_study.domain.User;
 import com.imooc.miaosha_study.redis.GoodsKey;
 import com.imooc.miaosha_study.redis.RedisService;
+import com.imooc.miaosha_study.result.Result;
 import com.imooc.miaosha_study.service.GoodsService;
 import com.imooc.miaosha_study.service.MiaoshaUserService;
+import com.imooc.miaosha_study.vo.GoodsDetaiVo;
 import com.imooc.miaosha_study.vo.GoodsVo;
 import org.apache.catalina.core.ApplicationContext;
 import org.slf4j.Logger;
@@ -58,15 +60,18 @@ public class GoodsController {
 //        String token=StringUtils.isEmpty(paramToken)?cookieToken:paramToken;
 //        MiaoshaUser user=userService.getByToken(response,token);
         model.addAttribute("user", user);
-        //查询商品列表
-        List<GoodsVo> goods = goodsService.listGoodsVo();
-        model.addAttribute("goodsList", goods);
-//        return "goods_list";
+
         //取缓存
         String html = redisService.get(GoodsKey.getGoodsList,"",String.class);
         if(!StringUtils.isEmpty(html)){
             return html;
         }
+
+        //查询商品列表
+        List<GoodsVo> goods = goodsService.listGoodsVo();
+        model.addAttribute("goodsList", goods);
+//        return "goods_list";
+
         //手动渲染
         SpringWebContext ctx=new SpringWebContext(request,response,request.getServletContext(),
                 request.getLocale(),model.asMap(),applicationContext);
@@ -115,6 +120,45 @@ public class GoodsController {
         model.addAttribute("miaoshaStatus", miaoshaStatus);
         model.addAttribute("remainSeconds", remainSeconds);
         return "goods_detail";
+    }
+
+    @RequestMapping("/to_detail2/{goodsId}")
+    @ResponseBody
+    public Result<GoodsDetaiVo> detail2(HttpServletRequest request, HttpServletResponse response, Model model,
+//                       @CookieValue(value = MiaoshaUserService.COOKI_NAME_TOKEN,required = false)  String cookieToken,
+//                       @RequestParam(value = MiaoshaUserService.COOKI_NAME_TOKEN,required = false) String paramToken,
+                                        MiaoshaUser user, @PathVariable("goodsId") long goodsId) {
+//        if(StringUtils.isEmpty(cookieToken) && StringUtils.isEmpty(paramToken)){
+//            return "login";
+//
+//        }
+//        String token=StringUtils.isEmpty(paramToken)?cookieToken:paramToken;
+//        MiaoshaUser user=userService.getByToken(response,token);
+
+        //snowflake 分布式id生成算法
+        GoodsVo goods = goodsService.getGoodsVoByGoodsId(goodsId);
+
+        long startAt = goods.getStartDate().getTime();
+        long endAt = goods.getEndDate().getTime();
+        long now = System.currentTimeMillis();
+        int miaoshaStatus = 0;
+        int remainSeconds = 0;
+        if (now < startAt) {//秒杀还没开始，倒计时
+            miaoshaStatus = 0;
+            remainSeconds = (int) ((startAt - now) / 1000);
+        } else if (now > endAt) {//秒杀已经结束
+            miaoshaStatus = 2;
+            remainSeconds = -1;
+        } else {//秒杀进行中
+            miaoshaStatus = 1;
+            remainSeconds = 0;
+        }
+        GoodsDetaiVo vo=new GoodsDetaiVo();
+        vo.setGoods(goods);
+        vo.setUser(user);
+        vo.setRemainSeconds(remainSeconds);
+        vo.setMiaoshaStatus(miaoshaStatus);
+        return Result.success(vo);
     }
 
 
