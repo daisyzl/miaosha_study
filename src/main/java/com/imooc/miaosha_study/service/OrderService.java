@@ -23,6 +23,11 @@ public class OrderService {
 
     }
 
+    public OrderInfo getOrderById(long orderId) {
+        return orderDao.getOrderById(orderId);
+    }
+
+
     public OrderInfo createOrder(MiaoshaUser user, GoodsVo goods) {
         OrderInfo orderInfo = new OrderInfo();
         orderInfo.setCreateDate(new Date());
@@ -43,4 +48,6 @@ public class OrderService {
         return orderInfo;
 
     }
+
+
 }
